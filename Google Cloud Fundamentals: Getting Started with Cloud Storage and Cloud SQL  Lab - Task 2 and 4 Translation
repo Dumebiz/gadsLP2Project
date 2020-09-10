@@ -1,0 +1,42 @@
+echo "TASK 2 - Create bloghost VM, include Startup Script and Open Port 80"
+
+gcloud config set project qwiklabs-gcp-03-9e9fe5b2bc45
+
+gcloud config set compute/zone us-central1-a
+
+gcloud compute instances create "bloghost" \
+--machine-type "e2-medium" \
+--image-project "debian-cloud" \
+--image "debian-9-stretch-v20200910" \
+--subnet "default" \
+--tags "http-server" \
+--metadata=startup-script=apt-get\ update$'\n'apt-get\ install\ apache2\ php\ php-mysql\ -y$'\n'service\ apache2\
+
+gcloud compute firewall-rules create default-allow-http \
+--direction=INGRESS \
+--priority=1000 \
+--network=default \
+--action=ALLOW \
+--rules=tcp:80 \
+--source-ranges=0.0.0.0/0 \
+--target-tags=http-server
+
+
+echo "TASK 4 - Create blog-db SQL Instance and blogdbuser SQL User"
+
+gcloud sql instances create "blog-db" \
+--tier "db-n1-standard-2" \
+--zone "us-central1-a" \
+--database-version "MYSQL_5_7" \
+--authorized-networks "35.202.98.7/32"
+
+
+gcloud sql users set-password root \
+--host "%" \
+--instance "blog-db" \
+--password "configurado2020"
+
+gcloud sql users create "blogdbuser" \
+--host="%" \
+--instance "bloog-db" \
+--password "kangaroo2020"
